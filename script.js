@@ -80,10 +80,23 @@ function initAccentPresetSwitcher() {
 function initCustomCursor() {
   const cursor = document.getElementById('customCursor');
   const cursorTrail = document.getElementById('cursorTrail');
-  
-  // Set Earth and Sun emojis
+  if (!cursor || !cursorTrail) return;
+
+  function trailEmojiForTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? '☀️' : '🌙';
+  }
+
+  // Earth follows pointer; trail is sun (light) or crescent moon (dark)
   cursor.innerHTML = '🌍';
-  cursorTrail.innerHTML = '☀️';
+  cursorTrail.innerHTML = trailEmojiForTheme();
+
+  const themeObserver = new MutationObserver(() => {
+    cursorTrail.innerHTML = trailEmojiForTheme();
+  });
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  });
   
   let mouseX = 0;
   let mouseY = 0;
@@ -110,7 +123,7 @@ function initCustomCursor() {
     cursorTrail.style.left = trailX + 'px';
     cursorTrail.style.top = trailY + 'px';
     
-    // Add rotation to the Sun
+    // Gentle rotation on trail (sun / moon)
     const rotation = (Date.now() * 0.1) % 360;
     cursorTrail.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
     
@@ -581,10 +594,11 @@ function revealOnScroll() {
   });
 }
 
-// Back to Top Button
+// Back to Top Button (optional — many project pages omit #backToTop)
 const backToTopButton = document.getElementById('backToTop');
 
 function toggleBackToTop() {
+  if (!backToTopButton) return;
   if (window.scrollY > 300) {
     backToTopButton.classList.add('visible');
   } else {
@@ -592,17 +606,16 @@ function toggleBackToTop() {
   }
 }
 
-backToTopButton.addEventListener('click', () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
+if (backToTopButton) {
+  backToTopButton.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   });
-});
+}
 
-// Add scroll event listener
 window.addEventListener('scroll', toggleBackToTop);
-
-// Initial check
 toggleBackToTop();
 
 // Smooth Scroll for Navigation Links
@@ -832,22 +845,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Back to Top button
-    const backToTopButton = document.getElementById('backToTop');
-    
-    window.addEventListener('scroll', () => {
+    const backToTopBtn = document.getElementById('backToTop');
+    if (backToTopBtn) {
+      window.addEventListener('scroll', () => {
         if (window.pageYOffset > 300) {
-            backToTopButton.classList.add('visible');
+          backToTopBtn.classList.add('visible');
         } else {
-            backToTopButton.classList.remove('visible');
+          backToTopBtn.classList.remove('visible');
         }
-    });
+      });
 
-    backToTopButton.addEventListener('click', () => {
+      backToTopBtn.addEventListener('click', () => {
         window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
+          top: 0,
+          behavior: 'smooth'
         });
-    });
+      });
+    }
 
     // Add hover effect to gallery items
     const galleryItems = document.querySelectorAll('.gallery-item');
