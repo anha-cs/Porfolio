@@ -38,6 +38,38 @@ function initThemeToggle() {
   updateToggleLabel();
 }
 
+function initNavMobile() {
+  const nav = document.querySelector('nav.navbar');
+  const burger = document.getElementById('navBurger');
+  const menu = document.getElementById('navMenu');
+  if (!nav || !burger || !menu) return;
+
+  const mq = window.matchMedia('(min-width: 901px)');
+
+  function setOpen(open) {
+    nav.classList.toggle('is-open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    document.body.classList.toggle('nav-menu-open', open);
+  }
+
+  burger.addEventListener('click', () => {
+    setOpen(!nav.classList.contains('is-open'));
+  });
+
+  menu.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => setOpen(false));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+
+  mq.addEventListener('change', () => {
+    if (mq.matches) setOpen(false);
+  });
+}
+
 // Accent preset (Sunset Dev only)
 function initAccentPresetSwitcher() {
   const html = document.documentElement;
@@ -91,7 +123,7 @@ function initCustomCursor() {
   document.body.style.cursor = 'none';
   
   // Show custom cursor on hoverable elements
-  const hoverableElements = document.querySelectorAll('a, button, .project-card, .skill-item, .light-switch-btn');
+  const hoverableElements = document.querySelectorAll('a, button, .project-card, .skill-item, .light-switch-btn, .nav-burger');
   
   hoverableElements.forEach(element => {
     element.addEventListener('mouseenter', () => {
@@ -591,6 +623,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize new features
   initThemeToggle();
+  initNavMobile();
   initAccentPresetSwitcher();
   initCustomCursor();
   initShootingStars();

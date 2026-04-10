@@ -14,25 +14,34 @@
   <div class="space-bg-layers" aria-hidden="true"><div class="shooting-stars"></div></div>
   <div class="light-mode-bg-overlay" aria-hidden="true"></div>
 
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Main navigation">
     <div class="logo-image">
       <a href="index.html"><img src="images/logo.png" alt="Portfolio Logo" /></a>
     </div>
-    <ul>
-      <li><a href="index.html#about">About Me</a></li>
-      <li><a href="index.html#skills">Skills</a></li>
-      <li><a href="index.html#experience">Education</a></li>
-      <li><a href="index.html#projects">My Projects</a></li>
-      <li><a href="Resume-AnhHa.pdf" target="_blank" rel="noopener">My Resume</a></li>
-      <li><a href="index.html#contact">Contact</a></li>
-    </ul>
-    <div class="theme-toggle">
-      <span class="theme-toggle-label">Turn the globe</span>
-      <button id="themeToggle" class="light-switch-btn" aria-label="Toggle light mode">
-        <div class="theme-globe" id="themeGlobe">
-          <span class="theme-globe-ring"></span>
-          <span class="theme-globe-core">🌍</span>
-        </div>
+    <div class="navbar-links" id="navMenu">
+      <ul>
+        <li><a href="index.html#about">About Me</a></li>
+        <li><a href="index.html#skills">Skills</a></li>
+        <li><a href="index.html#experience">Education</a></li>
+        <li><a href="index.html#projects">My Projects</a></li>
+        <li><a href="Resume-AnhHa.pdf" target="_blank" rel="noopener">My Resume</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="navbar-end">
+      <div class="theme-toggle">
+        <span class="theme-toggle-label">Turn the globe</span>
+        <button type="button" id="themeToggle" class="light-switch-btn" aria-label="Toggle light mode">
+          <div class="theme-globe" id="themeGlobe">
+            <span class="theme-globe-ring"></span>
+            <span class="theme-globe-core">🌍</span>
+          </div>
+        </button>
+      </div>
+      <button type="button" class="nav-burger" id="navBurger" aria-expanded="false" aria-controls="navMenu" aria-label="Open menu">
+        <span class="nav-burger-bar" aria-hidden="true"></span>
+        <span class="nav-burger-bar" aria-hidden="true"></span>
+        <span class="nav-burger-bar" aria-hidden="true"></span>
       </button>
     </div>
   </nav>
