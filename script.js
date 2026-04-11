@@ -192,14 +192,59 @@ function initAudioPlayer() {
   const STORAGE_PLAYING = 'portfolioAudioPlaying';
   const STORAGE_VOL = 'portfolioAudioVol';
 
+  // Browsers often pause <audio> during full-page navigation before pagehide fires.
+  // Persist explicit user intent instead of audio.paused so the next page can resume.
+  let userWantsPlayback = sessionStorage.getItem(STORAGE_PLAYING) === '1';
+
   function persistAudioState() {
     try {
       if (audio.duration && !Number.isNaN(audio.currentTime)) {
         sessionStorage.setItem(STORAGE_TIME, String(audio.currentTime));
       }
-      sessionStorage.setItem(STORAGE_PLAYING, audio.paused ? '0' : '1');
+      sessionStorage.setItem(STORAGE_PLAYING, userWantsPlayback ? '1' : '0');
       sessionStorage.setItem(STORAGE_VOL, String(audio.volume));
     } catch (_) {}
+  }
+
+  function applyPlayingUi(playing) {
+    if (playing) {
+      playBtn.classList.add('playing');
+      playBtn.setAttribute('aria-label', 'Pause');
+    } else {
+      playBtn.classList.remove('playing');
+      playBtn.setAttribute('aria-label', 'Play');
+    }
+  }
+
+  function tryResumePlayback() {
+    if (!userWantsPlayback) return Promise.resolve(false);
+    return audio
+      .play()
+      .then(() => {
+        applyPlayingUi(true);
+        return true;
+      })
+      .catch(() => false);
+  }
+
+  let resumeOnGestureCleanup = null;
+  function armResumeOnUserGesture() {
+    if (resumeOnGestureCleanup) return;
+    const once = () => {
+      tryResumePlayback().then((ok) => {
+        if (ok && resumeOnGestureCleanup) {
+          resumeOnGestureCleanup();
+          resumeOnGestureCleanup = null;
+        }
+      });
+    };
+    const opts = { capture: true, passive: true };
+    document.addEventListener('pointerdown', once, opts);
+    document.addEventListener('keydown', once, opts);
+    resumeOnGestureCleanup = () => {
+      document.removeEventListener('pointerdown', once, opts);
+      document.removeEventListener('keydown', once, opts);
+    };
   }
 
   audio.volume = 0.1;
@@ -213,14 +258,14 @@ function initAudioPlayer() {
 
   playBtn.addEventListener('click', () => {
     if (audio.paused) {
+      userWantsPlayback = true;
       audio.play().catch(() => {});
-      playBtn.classList.add('playing');
-      playBtn.setAttribute('aria-label', 'Pause');
+      applyPlayingUi(true);
       persistAudioState();
     } else {
+      userWantsPlayback = false;
       audio.pause();
-      playBtn.classList.remove('playing');
-      playBtn.setAttribute('aria-label', 'Play');
+      applyPlayingUi(false);
       persistAudioState();
     }
   });
@@ -254,23 +299,20 @@ function initAudioPlayer() {
         if (progressFill) progressFill.style.width = pct + '%';
         currentTimeEl.textContent = formatTime(savedT);
       }
-      if (sessionStorage.getItem(STORAGE_PLAYING) === '1') {
-        audio
-          .play()
-          .then(() => {
-            playBtn.classList.add('playing');
-            playBtn.setAttribute('aria-label', 'Pause');
-          })
-          .catch(() => {});
+      if (userWantsPlayback) {
+        tryResumePlayback().then((ok) => {
+          if (!ok) armResumeOnUserGesture();
+        });
       }
     } catch (_) {}
   });
 
   window.addEventListener('pagehide', persistAudioState);
+  window.addEventListener('beforeunload', persistAudioState);
 
   audio.addEventListener('ended', () => {
-    playBtn.classList.remove('playing');
-    playBtn.setAttribute('aria-label', 'Play');
+    userWantsPlayback = false;
+    applyPlayingUi(false);
     progressBar.value = 0;
     if (progressFill) progressFill.style.width = '0%';
     currentTimeEl.textContent = '0:00';
